@@ -1,7 +1,8 @@
-<script src="/socket.io/socket.io.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
-<script>
-	var socket = io.connect('http://localhost:8080');
+var socket = io.connect('http://localhost:8080');
+
+
+
+
 
 	// oпри подключении к серверу, попросите имя пользователя обратным вызовом
 	socket.on('connect', function(){
@@ -11,7 +12,13 @@
 
 	// слушает ,всякий раз, когда сервер emit updatechat, клиент  обновляет тело чата
 	socket.on('updatechat', function (username, data) {
-		$('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+		if(username=='SERVER'){
+			$('#conversation').append('<p class="msg-server"><b >'+username + ':</b> ' + data + '<br></p>');
+			
+			}
+			else{
+		$('#conversation').append('<p class="msg-user"><b class="login-user" >'+username + ':</b> <span class="massage">' + data + '</span><br></p>');
+			}
 	});
 
 	// слушает, всякий раз, когда сервер emit «updaterooms», клиент обновляет комнату, в которой находится клиент
@@ -30,6 +37,16 @@
 	function switchRoom(room){
 		socket.emit('switchRoom', room);
 	}
+	
+	//
+	socket.on('addusers',function(arr){
+		$('#users').empty();
+		$.each(arr,function(key, value) {
+			$('#users').append('<div><a href="#" onclick="switchUser(\''+value+'\')">' + value + '</a></div>');
+			
+		})
+		
+	})
 	
 	// при загрузке страницы
 	$(function(){
@@ -50,13 +67,6 @@
 		});
 	});
 
-</script>
-<div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
-	<b>ROOMS</b>
-	<div id="rooms"></div>
-</div>
-<div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
-	<div id="conversation"></div>
-	<input id="data" style="width:200px;" />
-	<input type="button" id="datasend" value="send" />
-</div>
+
+
+

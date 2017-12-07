@@ -3,12 +3,15 @@ var express = require('express')
   , http = require('http')
   , server = http.createServer(app)
   , io = require('socket.io').listen(server);
-
-server.listen(8080);
-
+var path = require('path');
+server.listen(8080,console.log('listen 8080'));
+app.set('views', path.join(__dirname, 'views'));
+app.set('views', './views');
+ app.set('view engine', 'jade');
+app.use(express.static('public'));
 // routing
 app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
+  res.render('index');
 });
 
 // имена пользователей, которые в настоящее время подключены к чату
@@ -21,12 +24,17 @@ io.sockets.on('connection', function (socket) {
 	
 	// когда клиент emit «adduser», server слушает и выполняет
 	socket.on('adduser', function(username){
+		
 		// сохранить имя пользователя в сеансе сокета для этого клиента
 		socket.username = username;
 		// сохранить имя room в сеансе сокета для этого клиента
 		socket.room = 'room1';
 		// добавьте имя пользователя клиента в глобальный список
 		usernames[username] = username;
+		
+		//
+		io.sockets.emit('addusers', usernames);
+		
 		// отправить клиента в room 1
 		socket.join('room1');
 		// emit к клиенту, с которым они подключены
@@ -45,7 +53,7 @@ io.sockets.on('connection', function (socket) {
 	socket.on('switchRoom', function(newroom){
 		socket.leave(socket.room);
 		socket.join(newroom);
-		socket.emit('updatechat', 'SERVER', 'you have connected to '+ newroom);
+		socket.emit('updatechat', 'SERVER', 'вы присоединился к '+ newroom);
 		// отправлено сообщение в  комнату в которой был клиент
 		socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username+' покинул комнату');
 		// название сессии сеанса обновления
