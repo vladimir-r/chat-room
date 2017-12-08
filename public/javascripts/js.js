@@ -37,14 +37,24 @@ var socket = io.connect('http://localhost:8080');
 	function switchRoom(room){
 		socket.emit('switchRoom', room);
 	}
+	function switchUsers(user){
+		/* отправка в отдельный socketid (личное сообщение)*/
+  
+	}
 	
-	//
+	//добавляем на страницы всех users в чате
 	socket.on('addusers',function(arr){
 		$('#users').empty();
 		$.each(arr,function(key, value) {
-			$('#users').append('<div><a href="#" onclick="switchUser(\''+value+'\')">' + value + '</a></div>');
+			$('#users').append('<a href="#" class="users">' + value.username + '</a><br>');
 			
 		})
+		
+	})
+	//слушаем privat
+	socket.on('privat msg',function(msg){
+		
+		alert(msg.msg)
 		
 	})
 	
@@ -65,8 +75,16 @@ var socket = io.connect('http://localhost:8080');
 				$('#datasend').focus().click();
 			}
 		});
+		$('#users').on('click','.users',function(){
+			var msg=prompt('massage','');
+			var su=$(this).text();
+			//socket.to(su).emit('privat msg');
+			socket.emit('private',{su:su,msg:msg});
+			return false
+		})
+		
 	});
 
-
+ 
 
 

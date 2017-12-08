@@ -30,15 +30,15 @@ io.sockets.on('connection', function (socket) {
 		// сохранить имя room в сеансе сокета для этого клиента
 		socket.room = 'room1';
 		// добавьте имя пользователя клиента в глобальный список
-		usernames[username] = username;
-		
+		usernames[username] ={ username,socketID:socket.id};
+		console.log(socket.id);
 		//
 		io.sockets.emit('addusers', usernames);
 		
 		// отправить клиента в room 1
 		socket.join('room1');
 		// emit к клиенту, с которым они подключены
-		socket.emit('updatechat', 'SERVER', 'вы присоединился к  room1');
+		socket.emit('updatechat', 'SERVER', 'вы присоединился к  room1 ваше имя  <b class="login-user" >'+username+'</b>');
 		// emit в комнату 1, что человек подключился к своей комнате
 		socket.broadcast.to('room1').emit('updatechat', 'SERVER', username + ' присоединился к этой комнате');
 		socket.emit('updaterooms', rooms, 'room1');
@@ -61,6 +61,26 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' присоединился к комнате');
 		socket.emit('updaterooms', rooms, newroom);
 	});
+	
+	
+	/*==================*/
+	socket.on('private',function(data){
+	if(usernames[data.su]){
+		
+		
+		console.log(usernames[data.su].socketID);
+		var sID=usernames[data.su].socketID;
+		socket.broadcast.to(sID).emit('privat msg',{msg:data.msg})
+	} 
+	});
+	
+	
+	
+//console.log(data);
+	
+	
+	
+	
 	
 
 	// когда пользователь отключается 
